@@ -1,10 +1,10 @@
-import os
-import json  # Import the json module
 from groq import Groq
+import os
+import json
 
 # Load the JSON data from the extracted_data.json file
 with open('extracted_data.json', 'r') as json_file:
-    extracted_data = json.load(json_file)  # Load the JSON data into a Python dictionary
+    extracted_data = json.load(json_file)
 
 # Initialize the Groq client
 api_key = os.environ.get("GROQ_API_KEY")
@@ -13,25 +13,27 @@ if api_key is None:
 
 client = Groq(api_key=api_key)
 
-# Truncate the comments to a maximum length
-max_length = 1000
-comments = extracted_data['comments'][:max_length]
 
-# Example usage of the extracted data
-completion = client.chat.completions.create(
-    model="llama3-8b-8192",
-    messages=[
-        {
-            "role": "user",
-            "content": "In a short 5-6 sentence paragraph, summarize this big block of text: " + comments
-        }
-    ],
-    temperature=1,
-    max_tokens=1024,
-    top_p=1,
-    stream=True,
-    stop=None,
-)
+def summarize_reviews(reviews, max_length):
+    reviews  = reviews[:max_length]
+    completion = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {
+                "role": "user",
+                "content": "I am creating a tool that summarizes the reviews that students are giving to a course an its professor." +
+                    "In a short 7-10 sentence paragraph, generalize these reivews to show true student sentiment, only return the paragraph" + reviews
+            }
+        ],
+        temperature=1,
+        max_tokens=1024,
+        top_p=1,
+        stream=True,
+        stop=None,
+    )
 
-for chunk in completion:
-    print(chunk.choices[0].delta.content or "", end="")
+    summary = ""
+    for chunk in completion:
+        summary += chunk.choices[0].delta.content or ""
+    
+    return summary

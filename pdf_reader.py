@@ -1,4 +1,5 @@
 from PyPDF2 import PdfReader
+from summarizer import summarize_reviews
 import json
 
 def extract_text_from_pdf(pdf_path):
@@ -36,7 +37,7 @@ def extract_text_from_pdf(pdf_path):
                 while j < len(lines) and lines[j] != "DEMOGRAPHICS":
                     comments += lines[j]
                     j += 1
-                json_file["comments"] = comments
+                json_file["comments"] = summarize_reviews(comments, 1500)
     return json.dumps(json_file)
 
 # Example usage
